@@ -1,0 +1,695 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Inclusive Carriage</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: home = one centred goal sentence on top, giant centred title, 5 project bubbles drifting around it.
+   Project page = big title, then the description as short lines scattered left/right down a long scroll, then boxed designers, credits, other projects, home button. */
+:root {
+  --paper: #fdfdfb;
+  --ink: #111114;
+  --blue: #0019ff;
+  --soft: #e9ecff;
+  --muted: #5c5f73;
+  --f-display: "Gaegu", "Comic Sans MS", cursive;
+  --f-hand: "Gaegu", "Comic Sans MS", cursive;
+  --f-ui: "Patrick Hand", "Comic Sans MS", cursive;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-ui); overflow: hidden;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+.page { position: relative; height: 100%; display: flex; flex-direction: column; }
+
+header {
+  display: grid; grid-template-columns: 1fr minmax(0, 2.4fr) 1fr; gap: 16px; align-items: start;
+  padding-block: 14px 8px; z-index: 5; font-size: 14px; line-height: 1.45;
+}
+header .side a { color: var(--ink); text-decoration: none; display: block; }
+header .side a:hover, header .side a:focus-visible { color: var(--blue); outline: none; }
+header .side span { color: var(--muted); display: block; }
+header .side.right { text-align: right; }
+header .center { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; }
+header .goal-label { margin: 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+header .goal { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.55; color: var(--ink); text-wrap: balance; }
+
+.stage { position: relative; flex: 1; min-height: 0; }
+
+.br { position: absolute; width: 34px; height: 34px; border: 0 solid var(--ink); filter: url(#wobble); pointer-events: none; }
+.br.tl { top: 8px; left: 4px; border-top-width: 3px; border-left-width: 3px; }
+.br.tr { top: 8px; right: 4px; border-top-width: 3px; border-right-width: 3px; }
+.br.bl { bottom: 12px; left: 4px; border-bottom-width: 3px; border-left-width: 3px; }
+.br.brr { bottom: 12px; right: 4px; border-bottom-width: 3px; border-right-width: 3px; }
+
+/* main title */
+h1 {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  margin: 0; width: min(78%, 1000px); text-align: center;
+  font-family: var(--f-display); font-weight: 800; line-height: 1.02;
+  font-size: clamp(48px, 10vw, 168px); letter-spacing: -0.01em;
+  color: var(--blue); user-select: none; z-index: 2; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; outline: none; text-wrap: balance;
+}
+h1.long { font-size: clamp(34px, 6vw, 100px); }
+h1:focus-visible { text-decoration: underline; text-decoration-thickness: 4px; }
+
+/* floating bubbles */
+.bubble {
+  position: absolute; top: 0; left: 0; z-index: 3;
+  max-width: 230px; padding: 12px 16px 14px;
+  font-family: var(--f-hand); font-size: 24px; line-height: 1.1; font-weight: 700;
+  background: var(--paper); cursor: pointer; will-change: transform;
+  -webkit-tap-highlight-color: transparent; outline: none;
+}
+.bubble::before {
+  content: ""; position: absolute; inset: 0;
+  border: 2.5px solid var(--ink); border-radius: 22px;
+  filter: url(#wobble); background: var(--paper); z-index: -1;
+}
+.bubble:focus-visible::before { border-width: 4px; }
+.bubble.doc { max-width: 190px; }
+.bubble.doc::before { border-radius: 10px; }
+.bubble .tail { position: absolute; width: 22px; height: 18px; bottom: -14px; filter: url(#wobble); }
+.bubble.right .tail { right: 22px; }
+.bubble.left .tail { left: 22px; }
+.bubble.thought .tail { display: none; }
+.bubble .dots { position: absolute; right: -26px; top: -28px; width: 30px; height: 30px; filter: url(#wobble); }
+.bubble .who { display: block; font-family: var(--f-ui); font-weight: 400; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.bubble .w, .passage .w { display: inline-block; }
+.bubble.scr { color: var(--blue); }
+.bubble::before, .bubble { transition: color .6s, background .6s, border-color .6s; }
+.bubble.scr::before { background: var(--soft); border-color: var(--blue); }
+/* moving letters: every character is a tile that slides to its new place, eased in and out */
+.wd { display: inline-block; white-space: nowrap; }
+.ch { display: inline-block; }
+.g { display: inline-block; transition: transform .7s cubic-bezier(.65,0,.35,1); }
+.fl > .g { transform: scaleX(-1); }
+h1 .g.flip { transform: scaleX(-1); }
+h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
+/* crossfade: old and new text sit in the same grid cell; one fades out while the other fades in */
+.xf { display: grid; }
+.xf > .layer { grid-area: 1 / 1; transition: opacity .45s ease; }
+@keyframes jit { 0% { transform: translateY(-6px) rotate(-6deg); opacity: .2 } 100% { transform: none; opacity: 1 } }
+
+.hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 13px; color: var(--muted); white-space: nowrap; margin: 0; }
+
+/* ---- project page: big scattered lines, fading at the screen edges ---- */
+.detail {
+  position: fixed; inset: 0; z-index: 20; background: var(--paper); overflow-y: auto; outline: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box; animation: fadeIn .35s ease-out;
+}
+.fade { position: fixed; left: 0; right: 0; height: 18vh; z-index: 21; pointer-events: none; }
+.fade.top { top: 0; background: linear-gradient(to bottom, var(--paper) 20%, transparent); }
+.fade.bottom { bottom: 0; background: linear-gradient(to top, var(--paper) 20%, transparent); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+.stack { max-width: 1120px; margin: 0 auto; padding-block: 20vh 24vh; display: flex; flex-direction: column; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.p-head { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; cursor: default; }
+.p-head .eyebrow { margin: 0; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.p-head h2 {
+  margin: 0; max-width: 18ch; font-family: var(--f-display); font-weight: 800; color: var(--blue);
+  font-size: clamp(44px, 9vw, 136px); letter-spacing: -0.01em; line-height: 1; text-wrap: balance;
+}
+.p-head .sub { margin: 4px 0 0; max-width: 60ch; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.p-head .headline { margin: 0; font-family: var(--f-hand); font-weight: 700; font-size: 28px; line-height: 1.1; }
+.scroll-cue { margin: 18px 0 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+.flow { display: flex; flex-direction: column; gap: 30vh; margin-top: 34vh; }
+.cluster {
+  display: flex; flex-direction: column; gap: .12em; max-width: 100%;
+  font-family: var(--f-display); font-weight: 500; letter-spacing: 0; line-height: 1.08;
+  font-size: clamp(32px, 6.4vw, 92px);
+}
+.cluster.left { align-self: flex-start; text-align: left; }
+.cluster.right { align-self: flex-end; text-align: right; }
+.cluster.center { align-self: center; text-align: center; }
+.line { display: block; transition: color .15s; }
+.line.scr { color: var(--blue); }
+
+.end { margin-top: 36vh; align-self: center; width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 26px; }
+.box { position: relative; padding: 24px 30px 26px; }
+.box::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  border: 2.5px solid var(--ink); border-radius: 20px; background: var(--paper); filter: url(#wobble);
+}
+.end .box:nth-child(2)::before { transform: rotate(-.35deg); }
+.end .box:nth-child(3)::before { transform: rotate(.3deg); }
+.box-label { margin: 0 0 12px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.people { display: grid; gap: 18px; }
+.people h3 { margin: 0 0 4px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+.people p, .credits p, .dl { margin: 0; font-size: 17px; line-height: 1.65; }
+.dl a { color: var(--blue); word-break: break-all; }
+.others { position: relative; margin-top: 30px; padding: 44px clamp(20px, 5vw, 56px) 48px; }
+.others .br { width: 30px; height: 30px; }
+.others .br.tl { top: 0; left: 0; } .others .br.tr { top: 0; right: 0; }
+.others .br.bl { bottom: 0; left: 0; } .others .br.brr { bottom: 0; right: 0; }
+.section-label { margin: 0 0 18px; font-family: var(--f-hand); font-weight: 700; font-size: 30px; line-height: 1; }
+.bars { display: flex; flex-direction: column; gap: 34px; }
+.bar {
+  position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  padding: 0 0 12px; color: var(--ink); text-decoration: none;
+  font-family: var(--f-display); font-weight: 500; letter-spacing: 0;
+  font-size: clamp(28px, 4.4vw, 54px); line-height: 1.05;
+}
+.bar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+  border-bottom: 2.5px solid var(--ink); filter: url(#wobble); transition: border-color .2s;
+}
+.bar:nth-child(even)::after { transform: rotate(.4deg); }
+.bar:nth-child(3n)::after { transform: rotate(-.3deg); }
+.bar small { display: block; margin-top: 8px; font-family: var(--f-ui); font-weight: 400; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.bar .arr { font-family: var(--f-ui); font-size: .6em; transition: transform .2s; padding-bottom: .15em; }
+.bar:hover, .bar:focus-visible { color: var(--blue); outline: none; }
+.bar:hover::after, .bar:focus-visible::after { border-color: var(--blue); }
+.bar:hover .arr, .bar:focus-visible .arr { transform: translateX(6px); }
+
+.home-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 18px; }
+.home-btn {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 2.5px solid var(--ink); background: var(--paper); color: var(--ink);
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+  transition: background .2s, color .2s, transform .2s;
+}
+.home-btn:hover, .home-btn:focus-visible { background: var(--blue); border-color: var(--blue); color: var(--paper); transform: translateX(-3px); outline: none; }
+.home-btn svg { width: 26px; height: 26px; }
+.home-label { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+
+@media (max-width: 640px) {
+  header { grid-template-columns: 1fr 1fr; font-size: 13px; }
+  header .center { grid-column: 1 / -1; grid-row: 2; }
+  header .goal { font-size: 14px; }
+  .bubble { font-size: 18px; max-width: 150px; padding: 9px 12px 11px; }
+  .bubble.doc { max-width: 130px; }
+  .box { padding: 18px 18px 20px; }
+  .flow { gap: 24vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scr .w, .bubble.scr .w { animation: none; }
+  .detail { animation: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="3.2"/></filter>
+</svg>
+
+<div class="page">
+  <header>
+    <div class="side"><a href="#about">Inclusive Carriage</a><span>Design for Social Futures</span></div>
+    <div class="center">
+      <p class="goal-label">Why this website</p>
+      <p class="goal">This site shares Inclusive Carriage, MRT carriages co-designed with advocates with disabilities, and lets you feel how reading can shift for someone with dyslexia as the words shift and swap places.</p>
+    </div>
+    <div class="side right"><a href="#about">About</a><span>LASALLE–UAS</span></div>
+  </header>
+
+  <main class="stage" id="stage">
+    <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br brr"></i>
+    <h1 id="title" role="link" tabindex="0" aria-label="Inclusive Carriage. Open project overview"></h1>
+    <p class="hint" id="hint">Click the title or a bubble to open</p>
+  </main>
+</div>
+
+<section class="detail" id="detail" hidden tabindex="-1">
+  <div class="fade top" aria-hidden="true"></div>
+  <div class="fade bottom" aria-hidden="true"></div>
+  <div class="stack">
+    <div class="p-head" id="d-titlebox">
+      <p class="eyebrow" id="d-who"></p>
+      <h2 id="d-title"></h2>
+      <p class="sub" id="d-sub" hidden></p>
+      <p class="headline" id="d-headline" hidden></p>
+      <p class="scroll-cue" aria-hidden="true">Scroll to read ↓</p>
+    </div>
+    <p class="sr" id="d-sr"></p>
+    <div class="flow" id="d-flow" aria-hidden="true"></div>
+    <div class="end">
+      <div class="box" id="d-download-box" hidden>
+        <p class="box-label">Download the guides</p>
+        <p class="dl">The wayfinding guides are available as open-access prototypes: <a id="d-download" target="_blank" rel="noopener"></a></p>
+      </div>
+      <div class="box" id="d-people-box"><div class="people" id="d-people"></div></div>
+      <div class="box credits" id="d-credits-box">
+        <p class="box-label">Other credits</p>
+        <p id="d-credits"></p>
+      </div>
+      <div class="others">
+        <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br brr"></i>
+        <p class="section-label">Other projects</p>
+        <nav class="bars" id="d-links" aria-label="Other projects"></nav>
+      </div>
+      <div class="home-wrap">
+        <button class="home-btn" id="home-btn" aria-label="Go to homepage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>
+        </button>
+        <p class="home-label">Homepage</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// ================= content (from DSF Inclusive Lab copy) =================
+const OTHER_CREDITS = "This project is driven by the passion of the students as design advocates and made possible through the dedicated mentorship of the LASALLE-UAS lecturers Tan Yeok Nguan, Ellvixson Yap, Mandi Lee, Chng Yi-Kai, Adib Kosnan, Ching Soon Tiac and Wendy Chua. The exhibition design is supported by teaching assistants Nigel Sng and Andrea Lau, and built by BARN.";
+const BYLINE = "BA (Hons) Design for Social Futures students and diverse abilities advocates";
+const SCHOOL = "LASALLE College of the Arts, University of the Arts Singapore";
+
+const PAGES = {
+  about: {
+    title: "Inclusive Carriage", who: "The project", sub: BYLINE + " · " + SCHOOL,
+    headline: "Not just designed for, but designed with",
+    info: ["As part of an ongoing academic partnership with LASALLE College of the Arts, second-year students from the Design for Social Futures programme engaged with advocates with disabilities to rethink what an inclusive MRT carriage could be. Rather than designing for users from a distance, the carriages were co-designed around lived experience, from seating and handrails to sightlines, movement and access. During the exhibition, they become living labs where visitors can experience these design decisions for themselves, while workshops continue the process of testing, learning and refining ideas with disability advocates and the public."],
+    credits: true
+  },
+  independent: {
+    title: "Independent Zone", who: "Visually impaired advocates", kind: "left",
+    info: ["The Independent Zone is a designated area for the visually impaired (VI) with a fold-down seat, near the doors of a carriage, where our VI advocates tend to gravitate towards when they travel in the MRT. Finding a priority seat is often not “worth the effort” when proximity to the exit provides a familiar navigational anchor and sense of security that they would be able to get off at the right station in time."],
+    people: [["Designers", "Chen Ying, Reynard Tate Wong, Wu Zexun, Yasmin Imanina Binte Dzul Fazli, Zavier Tan Jing Jie"], ["Visually Impaired Advocates", "Zahier Sammad, Rommel"]],
+    credits: true
+  },
+  wheelchair: {
+    title: "Wheelchair Zone", who: "Wheelchair users", kind: "right",
+    info: ["The Wheelchair Zone is a redesigned area with clear visual markings and light cues to increase public awareness of the priority spaces dedicated to wheelchair users and their needs, seeking to alleviate their anxiety as they enter or exit a packed train."],
+    people: [["Designers", "Caitlyn Agnes Resultay Estonina, Chen Weiting, Clarabel Annette Yeo Jia Mei, Low Jing Han, Ashley, Zhang, Lingyi"], ["Wheelchair Users and Advocates", "Nikki, Uncle Liang, Lay, Aqil"]],
+    credits: true
+  },
+  care: {
+    title: "A Seat for Care", who: "PWID advocates", kind: "right doc",
+    info: ["A Seat for Care is a double seater that prioritises the needs of caregivers to rest alongside their care recipients, advocating for a caregiver support mindset shift in our public transit environment.", "Tactile Grip Handles provide vital support for PWID advocates who lack a strong pincer grip and is a universal design for passengers who struggle to reach the overhanging handles due to a short stature or joint ailments."],
+    people: [["Designers", "Batrisyia Nasuha Binte Nasrul, Grace Wong Jyn Xue, Kim Subin, Nabilah Binte Muhammad Halim"], ["Persons with Intellectual Disability (PWID) Advocates", "June, Jiaying, Kavitha Krishnan, Lenny Lim"]],
+    credits: true
+  },
+  calm: {
+    title: "Calm Cabin", who: "Advocates living with ASD", kind: "thought",
+    info: ["Calm Cabin reimagines a more inclusive MRT experience for commuters with ASD to process information at their own pace as they cope with the sensory overload of travelling in a public train system. The visually quiet carriage space creates the conditions for our advocates living with ASD to be supported in sensory self-regulation while having clear points of focus to redirect their attention away from unwelcomed stimuli."],
+    people: [["Designers", "Farzeen Shanza D/O Mohamed Ismail, Leong Shu Ning Kyra, Neo Zhi Tian Angel, Ryu Taekyung"], ["Advocates living with Autism Spectrum Disorder (ASD)", "Adriel Yap, Justin Tham Tong'An"]],
+    credits: true
+  },
+  bionic: {
+    title: "Train Navigation Screen with Bionic Text", short: "Bionic Text", who: "Dyslexia & ADHD advocates", kind: "left doc",
+    info: ["The Train Navigation Screen with Bionic Text centers the experience of advocates with learning disabilities and ADHD by reducing the cognitive overload and anxiety that can arise during transit routines. By anchoring station names on the active route maps with bold weights in the first few letters, the navigation system supports ease of reading for commuters with dyslexia. A time tracker also provides predictability and a sense of awareness of how long the journey would last."],
+    people: [["Designers", "Jeslynn Low Xue Li, Leia Barbara Anne Coleman, Jeff Lim Guojun, Lake Lim Zi Jie, Yeo Ni Xuan"], ["Advocates with Dyslexia and/or ADHD", "Zavier Tan, Lim Zi Jie, Aik Heng"]],
+    credits: true
+  },
+  wayfinding: {
+    title: "Inclusive Wayfinding", who: "Companion project", sub: BYLINE + " · " + SCHOOL,
+    headline: "More ways to find your way",
+    info: ["A companion piece to the Inclusive Train Carriage from the LASALLE collaboration with disability advocates, social design students walk in the shoes of communities with disabilities to understand their struggles and unmet needs to navigate better in their daily transit rituals. From the arrival in Dhoby Gaut station to navigating the complex underground transit environment that leads to Plaza Singapura and finally to the exhibition at Temasek Shophouse, this project shines a light on the sensory experience of navigating and exploring an exhibition by providing inclusive guides for an often forgotten community and their caregivers. Through access maps for wheelchair users and audio narratives for the visually impaired to exhibition works, co-designed with advocates around different ways of listening, sensing and moving, it extends the same inclusive thinking from the carriage to the wider journey around it."],
+    link: "https://www.designforsocialfutures.com/NELbD_Wayfinding",
+    credits: false
+  }
+};
+const PROJECTS = ["independent", "wheelchair", "care", "calm", "bionic"];
+const HOME_TITLE = "Inclusive Carriage";
+const HOME_HEADLINE = PAGES.about.headline;
+
+// ================= moving-letter engine =================
+// Text is split into letter tiles. A variation is a new arrangement of the SAME tiles:
+// tiles slide to their new places (FLIP animation), and b/d p/q tiles mirror in place.
+const TAME = { b:"d", d:"b", p:"q", q:"p" };
+const EASE = "cubic-bezier(.65,0,.35,1)";
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const isLetter = c => /[A-Za-z]/.test(c);
+
+class Morph {
+  constructor(el, text) {
+    this.el = el;
+    this.words = text.split(" ").map(w => [...w].map(c => {
+      const t = document.createElement("span"); t.className = "ch"; t.c = c;
+      const g = document.createElement("span"); g.className = "g"; g.textContent = c;
+      t.append(g); return t;
+    }));
+    this.tiles = this.words.flat();
+    this.plainArr = this.words.map(w => w.map(t => ({ t, flip: false })));
+    this.render(this.plainArr, false);
+  }
+  render(arr, animate = true, ms = 700) {
+    const first = animate && !reduce ? new Map(this.tiles.map(t => [t, t.getBoundingClientRect()])) : null;
+    this.el.replaceChildren();
+    arr.forEach((w, i) => {
+      if (i) this.el.append(" ");
+      const ws = document.createElement("span"); ws.className = "wd";
+      w.forEach(({ t, flip }) => { t.classList.toggle("fl", flip); ws.append(t); });
+      this.el.append(ws);
+    });
+    this.tiles.forEach(t => { t.style.transition = "none"; t.style.transform = ""; t.firstChild.style.transitionDuration = (reduce ? 0 : ms) + "ms"; });
+    if (!first) return;
+    const moving = [];
+    this.tiles.forEach(t => {
+      const A = first.get(t), B = t.getBoundingClientRect();
+      if (!A.width && !A.height) return;
+      const dx = A.left - B.left, dy = A.top - B.top;
+      if (Math.abs(dx) > .5 || Math.abs(dy) > .5) { t.style.transform = `translate(${dx}px, ${dy}px)`; moving.push(t); }
+    });
+    void this.el.offsetWidth;
+    moving.forEach(t => { t.style.transition = `transform ${ms}ms ${EASE}`; t.style.transform = ""; });
+  }
+  plain(ms) { this.render(this.plainArr, true, ms); }
+  variant(mode, ms) { this.render(arrange(this.words, mode), true, ms); }
+}
+
+// ---- the 3 variations, as rearrangements of tiles ----
+function slip(w, idx) {
+  w = w.map(x => ({ ...x }));
+  const flips = idx.filter(i => TAME[w[i].t.c]);
+  if (flips.length && Math.random() < .4) { const i = pick(flips); w[i].flip = true; return w; }
+  const lo = idx.length >= 4 ? 1 : 0;
+  const p = lo + Math.floor(Math.random() * (idx.length - 1 - 2 * lo));
+  const i = idx[p], j = idx[p + 1];
+  [w[i], w[j]] = [w[j], w[i]];
+  return w;
+}
+// 1. Typos: about a third of the words get one small slip
+function slipLetters(arr) {
+  const letterIdx = w => w.map((x, i) => isLetter(x.t.c) ? i : -1).filter(i => i >= 0);
+  let changed = false;
+  const out = arr.map(w => {
+    const idx = letterIdx(w);
+    if (idx.length < 3 || Math.random() >= .3) return w;
+    changed = true; return slip(w, idx);
+  });
+  if (!changed) {
+    let li = 0; out.forEach((w, i) => { if (letterIdx(w).length > letterIdx(out[li]).length) li = i; });
+    const idx = letterIdx(out[li]);
+    if (idx.length >= 2) out[li] = slip(out[li], idx);
+  }
+  return out;
+}
+// 2. Word order: words trade places inside their sentence
+function swapWords(arr) {
+  const out = []; let sent = [];
+  const flush = () => {
+    if (sent.length >= 2) {
+      const orig = sent.slice();
+      const n = Math.max(1, Math.round(sent.length / 4));
+      for (let k = 0; k < n; k++) {
+        const i = Math.floor(Math.random() * sent.length);
+        let j = Math.floor(Math.random() * sent.length); if (j === i) j = (i + 1) % sent.length;
+        [sent[i], sent[j]] = [sent[j], sent[i]];
+      }
+      if (sent.every((w, i) => w === orig[i])) [sent[0], sent[sent.length - 1]] = [sent[sent.length - 1], sent[0]];
+    }
+    out.push(...sent); sent = [];
+  };
+  arr.forEach(w => { sent.push(w); if (/[.?!]/.test(w[w.length - 1]?.t.c || "")) flush(); });
+  flush();
+  return out;
+}
+// 3. Both
+function arrange(words, mode) {
+  let arr = words.map(w => w.map(t => ({ t, flip: false })));
+  if (mode !== 0) arr = swapWords(arr);
+  if (mode !== 1) arr = slipLetters(arr);
+  return arr;
+}
+const VARIANT_NAMES = ["Typos", "Word order", "Both"];
+function nextVariant(o) { o.vi = (o.vi ?? -1) + 1; return o.vi % 3; }
+
+// crossfade helper (only used when the text itself changes, e.g. title -> headline); returns the new layer
+function xfade(el, html, ms = 450) {
+  el.classList.add("xf");
+  const old = [...el.children].filter(c => c.classList.contains("layer"));
+  const n = document.createElement("span");
+  n.className = "layer"; n.innerHTML = html;
+  if (!old.length || reduce) { el.replaceChildren(n); return n; }
+  n.style.opacity = 0; n.style.transitionDuration = ms + "ms";
+  el.appendChild(n); void n.offsetWidth; n.style.opacity = 1;
+  old.forEach(o => { o.style.transitionDuration = ms + "ms"; o.style.opacity = 0; setTimeout(() => o.remove(), ms + 40); });
+  return n;
+}
+
+// ================= home =================
+const stage = document.getElementById("stage");
+const title = document.getElementById("title");
+const hint = document.getElementById("hint");
+const titleState = { vi: -1, m: null };
+
+function setTitle(text, long) {
+  title.classList.toggle("long", !!long);
+  const layer = xfade(title, "");
+  titleState.m = new Morph(layer, text);
+  return titleState.m;
+}
+// main title cycles by itself:
+// "Inclusive Carriage" -> slides into a variation -> back -> crossfades to the headline -> variation -> back -> repeat
+const H_HOLD = 4500, H_VAR = 2000, H_MOVE = 1000, H_REST = 2500;
+let homeCycle = null;
+function homeTitleLoop(text) {
+  const isHeadline = text === HOME_HEADLINE;
+  const m = setTitle(text, isHeadline);
+  homeCycle = setTimeout(() => {
+    title.classList.add("scr");
+    m.variant(nextVariant(titleState), H_MOVE);
+    homeCycle = setTimeout(() => {
+      title.classList.remove("scr");
+      m.plain(H_MOVE);
+      homeCycle = setTimeout(() => homeTitleLoop(isHeadline ? HOME_TITLE : HOME_HEADLINE), H_MOVE + H_REST);
+    }, H_MOVE + H_VAR);
+  }, H_HOLD);
+}
+clearTimeout(homeCycle);
+title.replaceChildren();
+homeTitleLoop(HOME_TITLE);
+
+title.addEventListener("click", () => openPage("about"));
+title.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPage("about"); } });
+
+const tailSVG = `<svg class="tail" viewBox="0 0 22 18"><path d="M2 0 L4 16 L18 0" fill="#fdfdfb" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+const dotsSVG = `<svg class="dots" viewBox="0 0 30 30"><circle cx="5" cy="25" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="15" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="6" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+
+const items = PROJECTS.map(id => {
+  const b = PAGES[id];
+  const el = document.createElement("div");
+  el.className = "bubble " + b.kind;
+  el.tabIndex = 0;
+  el.setAttribute("role", "link");
+  el.setAttribute("aria-label", `${b.title}. Open project`);
+  el.innerHTML = `<span class="who">${b.who}</span><span class="txt"></span>` + (b.kind.includes("thought") ? dotsSVG : tailSVG);
+  stage.appendChild(el);
+  const m = new Morph(el.querySelector(".txt"), b.title);
+  const it = { el, id, m, x: 0, y: 0, vx: 0, vy: 0, w: 0, h: 0, held: false };
+
+  el.addEventListener("click", () => openPage(id));
+  el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPage(id); } });
+  return it;
+});
+
+// each bubble slides into its next variation now and then, holds, and slides back
+const B_VAR = 2000, B_MOVE = 800;
+function bubbleLoop(it, delay) {
+  it.timer = setTimeout(() => {
+    it.el.classList.add("scr");
+    it.m.variant(nextVariant(it), B_MOVE);
+    it.timer = setTimeout(() => {
+      it.el.classList.remove("scr");
+      it.m.plain(B_MOVE);
+      bubbleLoop(it, 4500 + Math.random() * 3000);
+    }, B_MOVE + B_VAR);
+  }, delay);
+}
+items.forEach((it, i) => bubbleLoop(it, 1800 + i * 1300));
+
+// ---- floating physics: drift, bounce off edges, avoid the title, never overlap ----
+function measure() {
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const spots = [[.05,.08],[.7,.06],[.04,.6],[.66,.68],[.36,.8]];
+  items.forEach((it, i) => {
+    it.w = it.el.offsetWidth; it.h = it.el.offsetHeight;
+    if (!it.placed && W) {
+      it.x = spots[i][0] * W; it.y = spots[i][1] * H;
+      const a = Math.random() * Math.PI * 2; it.vx = Math.cos(a) * .35; it.vy = Math.sin(a) * .35;
+      it.placed = true;
+    }
+  });
+}
+function titleBox() {
+  const s = stage.getBoundingClientRect(), t = title.getBoundingClientRect();
+  return { x: t.left - s.left - 10, y: t.top - s.top - 10, w: t.width + 20, h: t.height + 20 };
+}
+function pushOut(it, r) {
+  const ox = Math.min(it.x + it.w, r.x + r.w) - Math.max(it.x, r.x);
+  const oy = Math.min(it.y + it.h, r.y + r.h) - Math.max(it.y, r.y);
+  if (ox <= 0 || oy <= 0) return;
+  const cx = it.x + it.w / 2 - (r.x + r.w / 2), cy = it.y + it.h / 2 - (r.y + r.h / 2);
+  if (ox < oy) { it.x += cx > 0 ? ox : -ox; it.vx = Math.abs(it.vx) * Math.sign(cx || 1); }
+  else { it.y += cy > 0 ? oy : -oy; it.vy = Math.abs(it.vy) * Math.sign(cy || 1); }
+}
+let paused = false;
+function tick() {
+  if (paused) { requestAnimationFrame(tick); return; }
+  const W = stage.clientWidth, H = stage.clientHeight, T = titleBox();
+  items.forEach(it => {
+    it.w = it.el.offsetWidth; it.h = it.el.offsetHeight;
+    if (!it.held && !reduce) { it.x += it.vx; it.y += it.vy; }
+    if (it.x < 8) { it.x = 8; it.vx = Math.abs(it.vx); }
+    if (it.y < 8) { it.y = 8; it.vy = Math.abs(it.vy); }
+    if (it.x + it.w > W - 8) { it.x = W - 8 - it.w; it.vx = -Math.abs(it.vx); }
+    if (it.y + it.h > H - 30) { it.y = H - 30 - it.h; it.vy = -Math.abs(it.vy); }
+    pushOut(it, T);
+  });
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    const a = items[i], b = items[j], pad = 14;
+    const ox = Math.min(a.x + a.w, b.x + b.w) + pad - Math.max(a.x, b.x);
+    const oy = Math.min(a.y + a.h, b.y + b.h) + pad - Math.max(a.y, b.y);
+    if (ox > 0 && oy > 0) {
+      const dx = Math.sign((a.x + a.w/2) - (b.x + b.w/2)) || 1, dy = Math.sign((a.y + a.h/2) - (b.y + b.h/2)) || 1;
+      const fa = b.held ? 1 : a.held ? 0 : .5, fb = 1 - fa;
+      if (ox < oy) { a.x += dx * ox * fa; b.x -= dx * ox * fb; [a.vx, b.vx] = [b.vx, a.vx]; }
+      else { a.y += dy * oy * fa; b.y -= dy * oy * fb; [a.vy, b.vy] = [b.vy, a.vy]; }
+    }
+  }
+  items.forEach(it => it.el.style.transform = `translate(${it.x}px, ${it.y}px)`);
+  requestAnimationFrame(tick);
+}
+
+// ================= project pages (hash routing) =================
+const detail = document.getElementById("detail");
+const titleBoxEl = document.getElementById("d-titlebox"), dTitle = document.getElementById("d-title");
+const flow = document.getElementById("d-flow");
+const tState = { vi: -1 };
+let current = null, lines = [], tMorph = null;
+
+// break the description into short lines (a few words each), grouped into clusters
+const LINE_CHARS = 18;
+function chunkLines(text) {
+  const out = []; let cur = "";
+  for (const w of text.split(" ")) {
+    if (cur && (cur + " " + w).length > LINE_CHARS) { out.push(cur); cur = w; }
+    else cur = cur ? cur + " " + w : w;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function buildFlow(paras) {
+  const clusters = [];
+  paras.forEach(p => {
+    const ls = chunkLines(p);
+    for (let i = 0; i < ls.length;) {
+      let n = 3 + (clusters.length % 2);
+      if (ls.length - (i + n) === 1) n += 1;   // no lonely last line
+      clusters.push(ls.slice(i, i + n)); i += n;
+    }
+  });
+  const align = i => i === 0 ? "center" : (i % 2 ? "right" : "left");
+  flow.replaceChildren();
+  lines = [];
+  clusters.forEach((c, i) => {
+    const cl = document.createElement("div"); cl.className = "cluster " + align(i);
+    c.forEach(text => {
+      const l = document.createElement("span"); l.className = "line";
+      cl.append(l);
+      l.m = new Morph(l, text); l.on = false;
+      lines.push(l);
+    });
+    flow.append(cl);
+  });
+}
+
+// scrolling: visible lines slide into a random variation (ease in), re-shuffle slowly while
+// scrolling continues, and slide back to the correct text once scrolling comes to a halt (ease out)
+let scrolling = false, scrollTimer = null, reshuffle = null, lastCheck = 0;
+const SWAP_MS = 900, BACK_MS = 1100;
+function scrambleVisible(all) {
+  const vh = innerHeight;
+  lines.forEach(l => {
+    if (l.on && !all) return;
+    const r = l.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > vh) return;
+    l.m.variant(Math.floor(Math.random() * 3), SWAP_MS);
+    l.classList.add("scr"); l.on = true;
+  });
+}
+function settleLines() {
+  scrolling = false; clearInterval(reshuffle);
+  lines.forEach(l => { if (l.on) { l.m.plain(BACK_MS); l.classList.remove("scr"); l.on = false; } });
+}
+detail.addEventListener("scroll", () => {
+  if (detail.hidden) return;
+  if (!scrolling) {
+    scrolling = true; scrambleVisible(true);
+    clearInterval(reshuffle); reshuffle = setInterval(() => scrambleVisible(true), 1600);
+  } else {
+    const now = performance.now();
+    if (now - lastCheck > 200) { lastCheck = now; scrambleVisible(false); }   // lines that just came into view
+  }
+  clearTimeout(scrollTimer); scrollTimer = setTimeout(settleLines, 300);
+}, { passive: true });
+
+// page title: cycles by itself. Correct spelling holds ~4.5s, each variation ~2s; letters slide between them
+let tCycle = null;
+const TITLE_HOLD = 4500, TITLE_VAR = 2000, TITLE_MOVE = 1000;
+function titleStep(plain) {
+  if (!current || !tMorph) return;
+  if (plain) {
+    titleBoxEl.classList.remove("scr");
+    tMorph.plain(TITLE_MOVE);
+    tCycle = setTimeout(() => titleStep(false), TITLE_HOLD);
+  } else {
+    titleBoxEl.classList.add("scr");
+    tMorph.variant(nextVariant(tState), TITLE_MOVE);
+    tCycle = setTimeout(() => titleStep(true), TITLE_VAR + TITLE_MOVE);
+  }
+}
+function startTitleCycle() {
+  clearTimeout(tCycle);
+  tMorph = new Morph(dTitle, current.title);
+  tCycle = setTimeout(() => titleStep(false), TITLE_HOLD);
+}
+
+function linkBars(id) {
+  const i0 = PROJECTS.indexOf(id);
+  const rotated = i0 >= 0 ? [...PROJECTS.slice(i0 + 1), ...PROJECTS.slice(0, i0)] : PROJECTS;
+  return [...rotated, "wayfinding", "about"].filter(k => k !== id).map(k => {
+    const tag = k === "about" ? "The project" : k === "wayfinding" ? "Companion project" : "Carriage project";
+    return `<a class="bar" href="#${k}"><span>${PAGES[k].title}<br><small>${tag}</small></span><span class="arr" aria-hidden="true">→</span></a>`;
+  }).join("");
+}
+
+function openPage(id) { location.hash = id; }
+function route() {
+  const id = location.hash.slice(1);
+  const b = PAGES[id];
+  tState.vi = -1; clearTimeout(scrollTimer); clearTimeout(tCycle); clearInterval(reshuffle); scrolling = false;
+  current = b || null;
+  if (!b) { detail.hidden = true; paused = false; lines = []; return; }
+  paused = true;
+  document.getElementById("d-who").textContent = b.who;
+  const sub = document.getElementById("d-sub"), head = document.getElementById("d-headline");
+  sub.hidden = !b.sub; sub.textContent = b.sub || "";
+  head.hidden = !b.headline; head.textContent = b.headline || "";
+  titleBoxEl.classList.remove("scr");
+  startTitleCycle();
+  buildFlow(b.info);
+  document.getElementById("d-sr").textContent = b.info.join(" ");
+  const dl = document.getElementById("d-download-box");
+  dl.hidden = !b.link;
+  if (b.link) { const a = document.getElementById("d-download"); a.href = b.link; a.textContent = b.link.replace("https://", ""); }
+  const pb = document.getElementById("d-people-box");
+  pb.hidden = !b.people;
+  if (b.people) document.getElementById("d-people").innerHTML = b.people.map(([h, names]) => `<div><h3>${h}</h3><p>${esc(names)}</p></div>`).join("");
+  document.getElementById("d-credits-box").hidden = !b.credits;
+  document.getElementById("d-credits").textContent = OTHER_CREDITS;
+  document.getElementById("d-links").innerHTML = linkBars(id);
+  detail.hidden = false; detail.scrollTop = 0;
+  detail.focus({ preventScroll: true });
+}
+document.getElementById("home-btn").addEventListener("click", () => { location.hash = "home"; });
+addEventListener("hashchange", route);
+
+const start = () => { measure(); tick(); route(); };
+document.fonts ? document.fonts.ready.then(start) : start();
+addEventListener("resize", measure);
+</script>
+
+</body></html>
