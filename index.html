@@ -190,7 +190,18 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
   .bubble { font-size: 18px; max-width: 150px; padding: 9px 12px 11px; }
   .bubble.doc { max-width: 130px; }
   .box { padding: 18px 18px 20px; }
-  .flow { gap: 24vh; }
+  /* phones: bigger words, fewer per line, tighter gaps so the scroll still feels spacious */
+  .flow { gap: 18vh; margin-top: 22vh; }
+  .cluster { font-size: 12.5vw; line-height: 1.02; gap: .08em; }
+  .p-head h2 { font-size: 15vw; line-height: .95; }
+  .p-head .headline { font-size: 26px; }
+  .stack { padding-block: 14vh 18vh; }
+  .end { margin-top: 24vh; }
+  h1 { width: 92%; font-size: 15vw; }
+  h1.long { font-size: 11vw; }
+  .bar { font-size: 9vw; }
+  .section-label { font-size: 30px; }
+  .others { padding-inline: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .scr .w, .bubble.scr .w { animation: none; }
@@ -561,11 +572,12 @@ const tState = { vi: -1 };
 let current = null, lines = [], tMorph = null;
 
 // break the description into short lines (a few words each), grouped into clusters
-const LINE_CHARS = 18;
+const lineChars = () => innerWidth <= 640 ? 12 : 18;   // phones: fewer characters per line so the words can be bigger
+let builtFor = null;
 function chunkLines(text) {
   const out = []; let cur = "";
   for (const w of text.split(" ")) {
-    if (cur && (cur + " " + w).length > LINE_CHARS) { out.push(cur); cur = w; }
+    if (cur && (cur + " " + w).length > lineChars()) { out.push(cur); cur = w; }
     else cur = cur ? cur + " " + w : w;
   }
   if (cur) out.push(cur);
@@ -584,6 +596,7 @@ function buildFlow(paras) {
   const align = i => i === 0 ? "center" : (i % 2 ? "right" : "left");
   flow.replaceChildren();
   lines = [];
+  builtFor = lineChars();
   clusters.forEach((c, i) => {
     const cl = document.createElement("div"); cl.className = "cluster " + align(i);
     c.forEach(text => {
@@ -596,34 +609,23 @@ function buildFlow(paras) {
   });
 }
 
-// scrolling: visible lines slide into a random variation (ease in), re-shuffle slowly while
-// scrolling continues, and slide back to the correct text once scrolling comes to a halt (ease out)
-let scrolling = false, scrollTimer = null, reshuffle = null, lastCheck = 0;
-const SWAP_MS = 900, BACK_MS = 1100;
-function scrambleVisible(all) {
-  const vh = innerHeight;
-  lines.forEach(l => {
-    if (l.on && !all) return;
-    const r = l.getBoundingClientRect();
-    if (r.bottom < 0 || r.top > vh) return;
-    l.m.variant(Math.floor(Math.random() * 3), SWAP_MS);
-    l.classList.add("scr"); l.on = true;
-  });
-}
-function settleLines() {
-  scrolling = false; clearInterval(reshuffle);
-  lines.forEach(l => { if (l.on) { l.m.plain(BACK_MS); l.classList.remove("scr"); l.on = false; } });
+// scrolling: each new scroll moves every line to the NEXT variation (Typos -> Word order -> Both -> Typos ...)
+// and it stays put. For a few seconds after a move, scrolling does nothing; once that pause is over,
+// the next scroll moves everything on to the following variation. Lines never reset to the plain text.
+let scrolling = false, reshuffle = null, scrollTimer = null, lockUntil = 0;
+const pageState = { vi: -1 };
+const SWAP_MS = 900, HOLD_MS = 3000;
+function advanceLines() {
+  const mode = nextVariant(pageState);
+  lines.forEach(l => { l.m.variant(mode, SWAP_MS); l.classList.add("scr"); l.on = true; });
+  if (tMorph) { tMorph.variant(mode, SWAP_MS); titleBoxEl.classList.add("scr"); }
+  lockUntil = performance.now() + SWAP_MS + HOLD_MS;
 }
 detail.addEventListener("scroll", () => {
   if (detail.hidden) return;
-  if (!scrolling) {
-    scrolling = true; scrambleVisible(true);
-    clearInterval(reshuffle); reshuffle = setInterval(() => scrambleVisible(true), 1600);
-  } else {
-    const now = performance.now();
-    if (now - lastCheck > 200) { lastCheck = now; scrambleVisible(false); }   // lines that just came into view
-  }
-  clearTimeout(scrollTimer); scrollTimer = setTimeout(settleLines, 300);
+  if (!scrolling && performance.now() >= lockUntil) advanceLines();   // a fresh scroll after the pause
+  scrolling = true;
+  clearTimeout(scrollTimer); scrollTimer = setTimeout(() => { scrolling = false; }, 250);
 }, { passive: true });
 
 // page title: cycles by itself. Correct spelling holds ~4.5s, each variation ~2s; letters slide between them
@@ -643,8 +645,7 @@ function titleStep(plain) {
 }
 function startTitleCycle() {
   clearTimeout(tCycle);
-  tMorph = new Morph(dTitle, current.title);
-  tCycle = setTimeout(() => titleStep(false), TITLE_HOLD);
+  tMorph = new Morph(dTitle, current.title);   // no timer: the title only moves with the scroll steps
 }
 
 function linkBars(id) {
@@ -660,7 +661,7 @@ function openPage(id) { location.hash = id; }
 function route() {
   const id = location.hash.slice(1);
   const b = PAGES[id];
-  tState.vi = -1; clearTimeout(scrollTimer); clearTimeout(tCycle); clearInterval(reshuffle); scrolling = false;
+  tState.vi = -1; clearTimeout(scrollTimer); clearTimeout(tCycle); clearInterval(reshuffle); scrolling = false; lockUntil = 0; pageState.vi = -1;
   current = b || null;
   if (!b) { detail.hidden = true; paused = false; lines = []; return; }
   paused = true;
@@ -689,7 +690,11 @@ addEventListener("hashchange", route);
 
 const start = () => { measure(); tick(); route(); };
 document.fonts ? document.fonts.ready.then(start) : start();
-addEventListener("resize", measure);
+addEventListener("resize", () => {
+  measure();
+  // rotating a phone / resizing across the breakpoint: re-split the lines for the new width
+  if (current && !detail.hidden && builtFor !== lineChars()) { buildFlow(current.info); pageState.vi = -1; lockUntil = 0; }
+});
 </script>
 
 </body></html>
