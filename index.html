@@ -2,9 +2,9 @@
 <title>Inclusive Carriage</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Patrick+Hand&family=ZCOOL+KuaiLe&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Patrick+Hand&family=ZCOOL+KuaiLe&family=Arima:wght@400;700&display=swap">
 <style>
-/* Layout: home = one centred goal sentence on top, giant centred title, 5 project bubbles drifting around it.
+/* Layout: home = corner labels on top, the "why this website" sentence at the bottom, giant centred title, 5 project bubbles drifting around it.
    Project page = big title, then the description as short lines scattered left/right down a long scroll, then boxed designers, credits, other projects, home button. */
 :root {
   --paper: #fdfdfb;
@@ -12,9 +12,9 @@
   --blue: #0019ff;
   --soft: #e9ecff;
   --muted: #5c5f73;
-  --f-display: "Gaegu", "ZCOOL KuaiLe", "Comic Sans MS", cursive;
-  --f-hand: "Gaegu", "ZCOOL KuaiLe", "Comic Sans MS", cursive;
-  --f-ui: "Patrick Hand", "ZCOOL KuaiLe", "Comic Sans MS", cursive;
+  --f-display: "Gaegu", "ZCOOL KuaiLe", "Arima", "Comic Sans MS", cursive;
+  --f-hand: "Gaegu", "ZCOOL KuaiLe", "Arima", "Comic Sans MS", cursive;
+  --f-ui: "Patrick Hand", "ZCOOL KuaiLe", "Arima", "Comic Sans MS", cursive;
   color-scheme: light;
 }
 html, body { height: 100%; }
@@ -28,16 +28,17 @@ body {
 .page { position: relative; height: 100%; display: flex; flex-direction: column; }
 
 header {
-  display: grid; grid-template-columns: 1fr minmax(0, 2.4fr) 1fr; gap: 16px; align-items: start;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;
   padding-block: 14px 8px; z-index: 5; font-size: 14px; line-height: 1.45;
 }
 header .side a { color: var(--ink); text-decoration: none; display: block; }
 header .side a:hover, header .side a:focus-visible { color: var(--blue); outline: none; }
 header .side span { color: var(--muted); display: block; }
 header .side.right { text-align: right; }
-header .center { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; }
-header .goal-label { margin: 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-header .goal { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.55; color: var(--ink); text-wrap: balance; }
+/* "Why this website" now sits at the bottom of the homepage */
+.why { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; padding-block: 2px max(8px, env(safe-area-inset-bottom, 0px)); }
+.why .goal-label { margin: 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.why .goal { margin: 0; max-width: 40ch; font-size: clamp(19px, 1.7vw, 24px); line-height: 1.4; color: var(--ink); text-wrap: balance; }
 
 .stage { position: relative; flex: 1; min-height: 0; }
 
@@ -53,7 +54,7 @@ h1 {
   margin: 0; width: min(78%, 1000px); text-align: center;
   font-family: var(--f-display); font-weight: 800; line-height: 1.02;
   font-size: clamp(48px, 10vw, 168px); letter-spacing: -0.01em;
-  color: var(--blue); user-select: none; z-index: 2; cursor: pointer;
+  color: var(--blue); user-select: none; z-index: 5; cursor: default; pointer-events: none;   /* always drawn above the bubbles; taps pass through */
   -webkit-tap-highlight-color: transparent; outline: none; text-wrap: balance;
 }
 h1.long { font-size: clamp(34px, 6vw, 100px); }
@@ -83,7 +84,7 @@ h1:focus-visible { text-decoration: underline; text-decoration-thickness: 4px; }
 .bubble .who { display: block; font-family: var(--f-ui); font-weight: 400; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
 .bubble .w, .passage .w { display: inline-block; }
 .bubble.scr { color: var(--blue); }
-.bubble::before, .bubble { transition: color .6s, background .6s, border-color .6s; }
+.bubble::before, .bubble { transition: color .6s, background .6s, border-color .6s, opacity .6s ease; }
 .bubble.scr::before { background: var(--soft); border-color: var(--blue); }
 /* moving letters: every character is a tile that slides to its new place, eased in and out */
 .wd { display: inline-block; white-space: nowrap; }
@@ -236,10 +237,14 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 .home-fab svg { width: 26px; height: 26px; }
 .home-fab:hover, .home-fab:focus-visible { background: var(--blue); color: var(--paper); transform: scale(1.06); outline: none; }
 
+:root[lang="ta"] .cluster { font-size: clamp(26px, 4.4vw, 64px); }
+:root[lang="ta"] .p-head h2 { font-size: clamp(34px, 6vw, 90px); }
+:root[lang="ta"] h1 { font-size: clamp(36px, 7vw, 120px); }
+:root[lang="ta"] h1.long { font-size: clamp(26px, 4vw, 64px); }
+
 @media (max-width: 640px) {
   header { grid-template-columns: 1fr 1fr; font-size: 13px; }
-  header .center { grid-column: 1 / -1; grid-row: 2; }
-  header .goal { font-size: 14px; }
+  .why .goal { font-size: 19px; max-width: 30ch; }
   .bubble { font-size: 18px; max-width: 150px; padding: 9px 12px 11px; }
   .bubble.doc { max-width: 130px; }
   .box { padding: 18px 18px 20px; }
@@ -253,6 +258,11 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
   h1 { width: 92%; font-size: 15vw; }
   h1.long { font-size: 11vw; }
   .bar { font-size: 9vw; }
+  :root[lang="ta"] .cluster { font-size: 8.5vw; }
+  :root[lang="ta"] .p-head h2 { font-size: 10vw; }
+  :root[lang="ta"] h1 { font-size: 10vw; }
+  :root[lang="ta"] h1.long { font-size: 7vw; }
+  :root[lang="ta"] .bar { font-size: 6.5vw; }
   .section-label { font-size: 30px; }
   .others { padding-inline: 20px; }
 }
@@ -268,18 +278,14 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 
 <div class="page">
   <header>
-    <div class="side"><a href="#about" data-i="cornerL">Inclusive Carriage</a><span data-i="cornerL2">Design for Social Futures</span></div>
-    <div class="center">
-      <p class="goal-label" data-i="goalLabel">Why this website</p>
-      <p class="goal" data-i="goal">This site shares Inclusive Carriage, MRT carriages co-designed with advocates with disabilities, and lets you feel how reading can shift for someone with dyslexia as the words shift and swap places.</p>
-    </div>
+    <div class="side"><a href="#about" data-i="cornerL">Inclusive Carriage</a><span data-i="cornerL2">NEW EVERYDAY LIFE BY DESIGN</span></div>
     <div class="side right"><a href="#about" data-i="about">About</a><span>LASALLE–UAS</span></div>
   </header>
 
   <main class="stage" id="stage">
     <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br brr"></i>
-    <h1 id="title" role="link" tabindex="0" aria-label="Inclusive Carriage. Open project overview"></h1>
-    <p class="hint" id="hint" data-i="hint">Click the title or a bubble to open</p>
+    <h1 id="title" aria-label="Inclusive Carriage"></h1>
+    <p class="hint" id="hint" data-i="hint">Tap a bubble to open</p>
     <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu">
       <span class="globe" aria-hidden="true">
         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -292,6 +298,11 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
     </button>
     <div class="lang-menu" id="lang-menu" hidden></div>
   </main>
+
+  <footer class="why">
+    <p class="goal-label" data-i="goalLabel">Why this website</p>
+    <p class="goal" data-i="goal">MRT carriages co-designed with disability advocates. Watch the words shift to feel how reading can be with dyslexia.</p>
+  </footer>
 </div>
 
 <section class="detail" id="detail" hidden tabindex="-1">
@@ -390,30 +401,38 @@ const PAGES = {
 // ---- Chinese (Simplified). Text that animates is written with spaces between words so the
 // effects know where words start and end; the spaces are not shown.
 const UI = {
-  en: { cornerL: "Inclusive Carriage", cornerL2: "Design for Social Futures", goalLabel: "Why this website",
-        goal: "This site shares Inclusive Carriage, MRT carriages co-designed with advocates with disabilities, and lets you feel how reading can shift for someone with dyslexia as the words shift and swap places.",
-        about: "About", hint: "Click the title or a bubble to open", scroll: "Scroll to read ↓",
+  en: { cornerL: "Inclusive Carriage", cornerL2: "NEW EVERYDAY LIFE BY DESIGN", goalLabel: "Why this website",
+        goal: "MRT carriages co-designed with disability advocates. Watch the words shift to feel how reading can be with dyslexia.",
+        about: "About", hint: "Tap a bubble to open", scroll: "Scroll to read ↓",
         dlLabel: "Download the guides", dlText: "The wayfinding guides are available as open-access prototypes:",
         credits: "Other credits", others: "Other projects", home: "Homepage",
         tagAbout: "The project", tagWay: "Companion project", tagProj: "Carriage project",
         open: "Open project", openAbout: "Open project overview", short: "EN", langAria: "Change language", homeAria: "Go to homepage" },
-  zh: { cornerL: "包容车厢", cornerL2: "社会未来设计", goalLabel: "网站初衷",
-        goal: "本网站介绍「包容车厢」：与残障倡导者共同设计的地铁车厢。看着文字移动、交换位置，你也能感受到阅读障碍者眼中的阅读是怎样的。",
-        about: "关于", hint: "点击标题或气泡即可打开", scroll: "向下滚动阅读 ↓",
+  zh: { cornerL: "包容车厢", cornerL2: "NEW EVERYDAY LIFE BY DESIGN", goalLabel: "网站初衷",
+        goal: "与残障倡导者共同设计的地铁车厢。看文字移动，感受阅读障碍者的阅读体验。",
+        about: "关于", hint: "点击气泡即可打开", scroll: "向下滚动阅读 ↓",
         dlLabel: "下载指南", dlText: "寻路指南以开放获取原型的形式提供下载：",
         credits: "其他鸣谢", others: "其他项目", home: "主页",
         tagAbout: "项目简介", tagWay: "配套项目", tagProj: "车厢项目",
         open: "打开项目", openAbout: "打开项目简介", short: "中文", langAria: "切换语言", homeAria: "返回主页" },
-  ms: { cornerL: "Gerabak Inklusif", cornerL2: "Reka Bentuk untuk Masa Depan Sosial", goalLabel: "Tujuan laman ini",
-        goal: "Laman ini berkongsi Gerabak Inklusif, gerabak MRT yang direka bersama penyokong orang kurang upaya, dan membolehkan anda merasai bagaimana bacaan boleh berubah bagi seseorang yang mengalami disleksia apabila perkataan beralih dan bertukar tempat.",
-        about: "Tentang", hint: "Klik tajuk atau gelembung untuk membuka", scroll: "Tatal untuk membaca ↓",
+  ms: { cornerL: "Gerabak Inklusif", cornerL2: "NEW EVERYDAY LIFE BY DESIGN", goalLabel: "Tujuan laman ini",
+        goal: "Gerabak MRT yang direka bersama penyokong OKU. Lihat perkataan beralih dan rasai bacaan bagi penghidap disleksia.",
+        about: "Tentang", hint: "Ketik gelembung untuk membuka", scroll: "Tatal untuk membaca ↓",
         dlLabel: "Muat turun panduan", dlText: "Panduan mencari arah tersedia sebagai prototaip akses terbuka:",
         credits: "Penghargaan lain", others: "Projek lain", home: "Laman utama",
         tagAbout: "Projek ini", tagWay: "Projek pengiring", tagProj: "Projek gerabak",
-        open: "Buka projek", openAbout: "Buka gambaran projek", short: "BM", langAria: "Tukar bahasa", homeAria: "Kembali ke laman utama" }
+        open: "Buka projek", openAbout: "Buka gambaran projek", short: "BM", langAria: "Tukar bahasa", homeAria: "Kembali ke laman utama" },
+  ta: { cornerL: "உள்ளடக்கிய ரயில் பெட்டி", cornerL2: "NEW EVERYDAY LIFE BY DESIGN", goalLabel: "இந்த இணையதளம் ஏன்",
+        goal: "மாற்றுத்திறனாளி ஆதரவாளர்களுடன் இணைந்து வடிவமைத்த MRT ரயில் பெட்டிகள். சொற்கள் இடம் மாறுவதைப் பார்த்து, டிஸ்லெக்ஸியா உள்ளவர்களின் வாசிப்பை உணருங்கள்.",
+        about: "பற்றி", hint: "திறக்க ஒரு குமிழியைத் தட்டவும்", scroll: "படிக்க கீழே உருட்டவும் ↓",
+        dlLabel: "வழிகாட்டிகளைப் பதிவிறக்கவும்", dlText: "வழிகாட்டிகள் திறந்த அணுகல் முன்மாதிரிகளாகக் கிடைக்கின்றன:",
+        credits: "பிற நன்றிகள்", others: "பிற திட்டங்கள்", home: "முகப்பு",
+        tagAbout: "திட்டம்", tagWay: "துணைத் திட்டம்", tagProj: "ரயில் பெட்டித் திட்டம்",
+        open: "திட்டத்தைத் திற", openAbout: "திட்ட விவரம்", short: "தமிழ்", langAria: "மொழியை மாற்று", homeAria: "முகப்புக்குத் திரும்பு" }
 };
-const LANG_NAMES = { en: "English", zh: "中文", ms: "Bahasa Melayu" };
-const LANG_ORDER = ["en", "ms", "zh"];
+const LANG_NAMES = { en: "English", zh: "中文", ms: "Bahasa Melayu", ta: "தமிழ்" };
+const LANG_TAG = { en: "en", zh: "zh-Hans", ms: "ms", ta: "ta" };
+const LANG_ORDER = ["en", "ms", "zh", "ta"];
 const ZH = {
   about: { title: "包容 车厢", who: "项目简介",
     sub: "社会未来设计（荣誉）学士课程学生与多元能力倡导者 · 拉萨尔艺术学院，新加坡艺术大学",
@@ -466,17 +485,42 @@ const MS = {
     headline: "Lebih banyak cara mencari arah",
     info: ["Sebagai pengiring kepada Gerabak Kereta Api Inklusif hasil kerjasama LASALLE dengan penyokong orang kurang upaya, pelajar reka bentuk sosial menyelami pengalaman komuniti orang kurang upaya untuk memahami cabaran dan keperluan mereka yang belum dipenuhi supaya dapat bergerak dengan lebih baik dalam rutin perjalanan harian. Dari ketibaan di stesen Dhoby Ghaut hingga melalui laluan bawah tanah yang rumit ke Plaza Singapura dan akhirnya ke pameran di Temasek Shophouse, projek ini menyorot pengalaman deria ketika mencari arah dan meneroka pameran dengan menyediakan panduan inklusif untuk komuniti yang sering dilupakan serta penjaga mereka. Melalui peta akses untuk pengguna kerusi roda dan naratif audio karya pameran untuk golongan cacat penglihatan, yang direka bersama penyokong mengikut cara mendengar, merasa dan bergerak yang berbeza, projek ini meluaskan pemikiran inklusif yang sama dari gerabak kepada keseluruhan perjalanan di sekitarnya."] }
 };
+const TA = {
+  about: { title: "உள்ளடக்கிய ரயில் பெட்டி", who: "திட்டம்", sub: "BA (Hons) Design for Social Futures மாணவர்களும் பல்வேறு திறன் ஆதரவாளர்களும் · LASALLE College of the Arts, University of the Arts Singapore",
+    headline: "அவர்களுக்காக மட்டுமல்ல, அவர்களுடன் இணைந்து வடிவமைக்கப்பட்டது",
+    info: ["LASALLE College of the Arts உடனான தொடர் கல்விக் கூட்டாண்மையின் ஒரு பகுதியாக, Design for Social Futures திட்டத்தின் இரண்டாம் ஆண்டு மாணவர்கள் மாற்றுத்திறனாளி ஆதரவாளர்களுடன் இணைந்து, உள்ளடக்கிய MRT ரயில் பெட்டி எப்படி இருக்கலாம் என்பதை மறுபரிசீலனை செய்தனர். பயனர்களுக்காகத் தொலைவிலிருந்து வடிவமைப்பதற்குப் பதிலாக, இருக்கைகள், கைப்பிடிகள் முதல் பார்வைக் கோடுகள், நகர்வு, அணுகல் வரை வாழ்ந்த அனுபவத்தை மையமாகக் கொண்டு இந்தப் பெட்டிகள் இணைந்து வடிவமைக்கப்பட்டன. கண்காட்சியின் போது இவை வாழும் ஆய்வகங்களாக மாறுகின்றன; பார்வையாளர்கள் இந்த வடிவமைப்பு முடிவுகளை நேரடியாக அனுபவிக்கலாம். பயிலரங்குகள் மாற்றுத்திறனாளி ஆதரவாளர்களுடனும் பொதுமக்களுடனும் யோசனைகளைச் சோதித்து, கற்று, மேம்படுத்தும் பணியைத் தொடர்கின்றன."] },
+  independent: { title: "சுதந்திர மண்டலம்", who: "பார்வைக் குறைபாடுள்ள ஆதரவாளர்கள்",
+    info: ["சுதந்திர மண்டலம் என்பது பார்வைக் குறைபாடுள்ளவர்களுக்கான (VI) ஒரு சிறப்புப் பகுதி. இதில் மடிக்கக்கூடிய இருக்கை உள்ளது; இது பெட்டியின் கதவுகளுக்கு அருகில், எங்கள் VI ஆதரவாளர்கள் MRT-யில் பயணிக்கும்போது பொதுவாக நிற்கும் இடத்தில் அமைந்துள்ளது. வெளியேறும் வழிக்கு அருகில் இருப்பது பழக்கமான வழிகாட்டும் அடையாளத்தையும், சரியான நிலையத்தில் சரியான நேரத்தில் இறங்க முடியும் என்ற பாதுகாப்பு உணர்வையும் தருவதால், முன்னுரிமை இருக்கையைத் தேடுவது பெரும்பாலும் “பயனில்லாதது” ஆகிவிடுகிறது."],
+    peopleH: ["வடிவமைப்பாளர்கள்", "பார்வைக் குறைபாடுள்ள ஆதரவாளர்கள்"] },
+  wheelchair: { title: "சக்கர நாற்காலி மண்டலம்", who: "சக்கர நாற்காலி பயனர்கள்",
+    info: ["சக்கர நாற்காலி மண்டலம் தெளிவான காட்சிக் குறியீடுகள் மற்றும் ஒளிக் குறிப்புகளுடன் மறுவடிவமைக்கப்பட்ட பகுதி. சக்கர நாற்காலி பயனர்களுக்கான முன்னுரிமை இடங்கள் மற்றும் அவர்களின் தேவைகள் பற்றிய பொதுமக்களின் விழிப்புணர்வை இது அதிகரிக்கிறது; நெரிசலான ரயிலில் ஏறும்போதும் இறங்கும்போதும் அவர்களின் பதற்றத்தைக் குறைக்க முயல்கிறது."],
+    peopleH: ["வடிவமைப்பாளர்கள்", "சக்கர நாற்காலி பயனர்களும் ஆதரவாளர்களும்"] },
+  care: { title: "பராமரிப்புக்கான இருக்கை", who: "அறிவுசார் குறைபாடுள்ளோர் ஆதரவாளர்கள்",
+    info: ["பராமரிப்புக்கான இருக்கை என்பது இருவர் அமரும் இருக்கை; பராமரிப்பாளர்கள் தாங்கள் கவனித்துக்கொள்பவர்களுடன் அருகருகே ஓய்வெடுக்கும் தேவைக்கு இது முன்னுரிமை அளிக்கிறது. பொதுப் போக்குவரத்துச் சூழலில் பராமரிப்பாளர்களை ஆதரிக்கும் மனப்பான்மை மாற்றத்தை இது வலியுறுத்துகிறது.",
+           "தொட்டுணரக்கூடிய பிடிகள், வலுவான விரல் பிடிப்பு இல்லாத அறிவுசார் குறைபாடுள்ள ஆதரவாளர்களுக்கு முக்கிய ஆதரவை வழங்குகின்றன. குறைந்த உயரம் அல்லது மூட்டு வலி காரணமாக மேலே தொங்கும் கைப்பிடிகளை எட்ட முடியாத பயணிகளுக்கும் இது ஒரு பொது வடிவமைப்பு."],
+    peopleH: ["வடிவமைப்பாளர்கள்", "அறிவுசார் குறைபாடுள்ளோர் (PWID) ஆதரவாளர்கள்"] },
+  calm: { title: "அமைதிப் பெட்டி", who: "ASD உடன் வாழும் ஆதரவாளர்கள்",
+    info: ["அமைதிப் பெட்டி, ASD உள்ள பயணிகள் பொது ரயில் அமைப்பில் பயணிக்கும்போது ஏற்படும் புலன் சுமையைச் சமாளித்து, தங்கள் வேகத்தில் தகவலைச் செயலாக்க உதவும் வகையில் மேலும் உள்ளடக்கிய MRT அனுபவத்தை மறுகற்பனை செய்கிறது. பார்வைக்கு அமைதியான இந்தப் பெட்டி, ASD உடன் வாழும் எங்கள் ஆதரவாளர்கள் புலன் சுய ஒழுங்குமுறைக்கு ஆதரவு பெறும் சூழலை உருவாக்குகிறது; விரும்பாத தூண்டுதல்களிலிருந்து கவனத்தைத் திசைதிருப்ப தெளிவான கவனப் புள்ளிகளையும் தருகிறது."],
+    peopleH: ["வடிவமைப்பாளர்கள்", "ஆட்டிசம் நிறமாலைக் கோளாறு (ASD) உடன் வாழும் ஆதரவாளர்கள்"] },
+  bionic: { title: "பயோனிக் உரையுடன் ரயில் வழிகாட்டித் திரை", who: "டிஸ்லெக்ஸியா & ADHD ஆதரவாளர்கள்",
+    info: ["பயோனிக் உரையுடன் கூடிய ரயில் வழிகாட்டித் திரை, கற்றல் குறைபாடுகள் மற்றும் ADHD உள்ள ஆதரவாளர்களின் அனுபவத்தை மையமாகக் கொண்டு, பயணத்தின்போது ஏற்படக்கூடிய அறிவாற்றல் சுமையையும் பதற்றத்தையும் குறைக்கிறது. இயங்கும் வழித்தட வரைபடங்களில் நிலையப் பெயர்களின் முதல் சில எழுத்துகளைத் தடிமனாக்குவதன் மூலம், டிஸ்லெக்ஸியா உள்ள பயணிகள் எளிதாகப் படிக்க இந்த அமைப்பு உதவுகிறது. நேரக் கண்காணிப்பு, பயணம் எவ்வளவு நேரம் நீடிக்கும் என்ற முன்கணிப்பையும் விழிப்புணர்வையும் தருகிறது."],
+    peopleH: ["வடிவமைப்பாளர்கள்", "டிஸ்லெக்ஸியா மற்றும்/அல்லது ADHD உள்ள ஆதரவாளர்கள்"] },
+  wayfinding: { title: "உள்ளடக்கிய வழிகாணல்", who: "துணைத் திட்டம்", sub: "BA (Hons) Design for Social Futures மாணவர்களும் பல்வேறு திறன் ஆதரவாளர்களும் · LASALLE College of the Arts, University of the Arts Singapore",
+    headline: "வழி கண்டுபிடிக்க மேலும் பல வழிகள்",
+    info: ["மாற்றுத்திறனாளி ஆதரவாளர்களுடன் LASALLE மேற்கொண்ட உள்ளடக்கிய ரயில் பெட்டித் திட்டத்தின் துணைப் படைப்பாக, சமூக வடிவமைப்பு மாணவர்கள் மாற்றுத்திறனாளி சமூகங்களின் நிலையில் இருந்து அவர்களின் சிரமங்களையும் பூர்த்தியாகாத தேவைகளையும் புரிந்துகொண்டு, அன்றாடப் பயணங்களில் சிறப்பாக வழி கண்டறிய உதவுகின்றனர். Dhoby Ghaut நிலையத்தை அடைவது முதல், Plaza Singapura-க்குச் செல்லும் சிக்கலான நிலத்தடிப் பாதை வழியாக, இறுதியில் Temasek Shophouse கண்காட்சி வரை, இந்தத் திட்டம் வழி கண்டறிதல் மற்றும் கண்காட்சியைப் பார்வையிடுதலின் புலன் அனுபவத்தை வெளிச்சமிடுகிறது; அடிக்கடி மறக்கப்படும் சமூகத்துக்கும் அவர்களின் பராமரிப்பாளர்களுக்கும் உள்ளடக்கிய வழிகாட்டிகளை வழங்குகிறது. சக்கர நாற்காலி பயனர்களுக்கான அணுகல் வரைபடங்கள் மற்றும் பார்வைக் குறைபாடுள்ளவர்களுக்கான கண்காட்சிப் படைப்புகளின் ஒலி விவரணைகள் மூலம், ரயில் பெட்டியின் அதே உள்ளடக்கிய சிந்தனையைச் சுற்றியுள்ள முழுப் பயணத்துக்கும் இந்தத் திட்டம் விரிவுபடுத்துகிறது. இவை கேட்கும், உணரும், நகரும் வெவ்வேறு வழிகளைச் சுற்றி ஆதரவாளர்களுடன் இணைந்து வடிவமைக்கப்பட்டவை."] }
+};
+const OTHER_CREDITS_TA = "இந்தத் திட்டம் வடிவமைப்பு ஆதரவாளர்களாக மாணவர்களின் ஆர்வத்தால் இயக்கப்பட்டு, LASALLE-UAS விரிவுரையாளர்கள் Tan Yeok Nguan, Ellvixson Yap, Mandi Lee, Chng Yi-Kai, Adib Kosnan, Ching Soon Tiac, Wendy Chua ஆகியோரின் அர்ப்பணிப்புள்ள வழிகாட்டலால் சாத்தியமானது. கண்காட்சி வடிவமைப்புக்கு ஆசிரிய உதவியாளர்கள் Nigel Sng, Andrea Lau ஆதரவளித்தனர்; BARN இதை உருவாக்கியது.";
 const OTHER_CREDITS_MS = "Projek ini didorong oleh semangat para pelajar sebagai penyokong reka bentuk dan menjadi kenyataan berkat bimbingan pensyarah LASALLE-UAS Tan Yeok Nguan, Ellvixson Yap, Mandi Lee, Chng Yi-Kai, Adib Kosnan, Ching Soon Tiac dan Wendy Chua. Reka bentuk pameran disokong oleh pembantu pengajar Nigel Sng dan Andrea Lau, dan dibina oleh BARN.";
 const OTHER_CREDITS_ZH = "本项目由学生作为设计倡导者的热情推动，并有赖拉萨尔–新加坡艺术大学讲师 Tan Yeok Nguan、Ellvixson Yap、Mandi Lee、Chng Yi-Kai、Adib Kosnan、Ching Soon Tiac 和 Wendy Chua 的悉心指导才得以实现。展览设计由助教 Nigel Sng 和 Andrea Lau 协助，并由 BARN 搭建。";
 
 let lang = "en";
-try { const saved = localStorage.getItem("ic-lang"); if (saved === "zh" || saved === "ms") lang = saved; } catch (e) {}
+try { const saved = localStorage.getItem("ic-lang"); if (["zh", "ms", "ta"].includes(saved)) lang = saved; } catch (e) {}
 const t = k => UI[lang][k];
 const disp = s => lang === "zh" ? s.replace(/ /g, "") : s;   // a title as shown outside the animation
 // one page's content in the current language (names stay as written)
 function P(id) {
   const b = PAGES[id];
-  const z = (lang === "zh" ? ZH : lang === "ms" ? MS : {})[id];
+  const z = ({ zh: ZH, ms: MS, ta: TA }[lang] || {})[id];
   if (!z) return b;
   return { ...b, ...z, people: b.people && b.people.map(([h, n], i) => [z.peopleH[i] || h, n]) };
 }
@@ -493,13 +537,16 @@ const EASE = "cubic-bezier(.65,0,.35,1)";
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const isCJK = c => /[\u3400-\u9fff]/.test(c);
-const isLetter = c => /[A-Za-z]/.test(c) || isCJK(c);
+const isTamil = c => /[\u0B80-\u0BFF]/.test(c);
+const isLetter = c => /[A-Za-z]/.test(c) || isCJK(c) || isTamil(c);
+const GRAPH = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
+const graphemes = w => GRAPH ? [...GRAPH.segment(w)].map(x => x.segment) : [...w];   // keeps Tamil vowel signs with their letter
 
 class Morph {
   constructor(el, text) {
     this.el = el;
     this.cjk = /[\u3400-\u9fff]/.test(text);
-    this.words = text.split(" ").map(w => [...w].map(c => {
+    this.words = text.split(" ").map(w => graphemes(w).map(c => {
       const t = document.createElement("span"); t.className = "ch"; t.c = c;
       const g = document.createElement("span"); g.className = "g"; g.textContent = c;
       t.append(g); return t;
@@ -637,20 +684,18 @@ clearTimeout(homeCycle);
 title.replaceChildren();
 homeTitleLoop(homeTitleText());
 
-title.addEventListener("click", () => openPage("about"));
-title.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPage("about"); } });
 
 const tailSVG = `<svg class="tail" viewBox="0 0 22 18"><path d="M2 0 L4 16 L18 0" fill="#fdfdfb" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
 const dotsSVG = `<svg class="dots" viewBox="0 0 30 30"><circle cx="5" cy="25" r="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="15" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="6" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
 
-const items = PROJECTS.map(id => {
+const items = PROJECTS.map((id, i) => {
   const b = P(id);
   const el = document.createElement("div");
-  el.className = "bubble " + b.kind;
+  el.className = "bubble " + (i % 2 ? "right" : "left");   // all the same speech-bubble shape
   el.tabIndex = 0;
   el.setAttribute("role", "link");
   el.setAttribute("aria-label", `${disp(b.title)}. ${t("open")}`);
-  el.innerHTML = `<span class="who">${b.who}</span><span class="txt"></span>` + (b.kind.includes("thought") ? dotsSVG : tailSVG);
+  el.innerHTML = `<span class="who">${b.who}</span><span class="txt"></span>` + tailSVG;
   stage.appendChild(el);
   const m = new Morph(el.querySelector(".txt"), b.title);
   const it = { el, id, m, x: 0, y: 0, vx: 0, vy: 0, w: 0, h: 0, held: false };
@@ -675,56 +720,135 @@ function bubbleLoop(it, delay) {
 }
 items.forEach((it, i) => bubbleLoop(it, 1800 + i * 1300));
 
-// ---- floating physics: drift, bounce off edges, avoid the title, never overlap ----
+// ---- floating: bubbles drift anywhere on screen (the title is not an obstacle), slowly change
+// direction, gently keep their distance from each other, and every few seconds two of them glide
+// to swap places, so they never bunch up in one corner ----
+const SPEED = .32, SWAP_EVERY = [4500, 8000], SWAP_DUR = 1800;
+let nextSwap = performance.now() + 3500, nextFill = performance.now() + 2500;
+// empty-space fill: split the screen into a grid; if part of it is empty (often the bottom on phones)
+// while another part is crowded, a bubble from the crowd fades out and fades back in in the gap
+const TELE_FADE = 650;
+function fillGaps(W, H) {
+  const cols = W < 640 ? 2 : 3, rows = W < 640 ? 4 : 3, usableH = H - 30;
+  const cw = W / cols, ch = usableH / rows;
+  const cell = (x, y) => Math.min(rows - 1, Math.max(0, Math.floor(y / ch))) * cols + Math.min(cols - 1, Math.max(0, Math.floor(x / cw)));
+  const sr = stage.getBoundingClientRect(), tr = title.getBoundingClientRect();
+  const titleCell = cell(tr.left - sr.left + tr.width / 2, tr.top - sr.top + tr.height / 2);
+  const groups = Array.from({ length: cols * rows }, () => []);
+  items.forEach(it => groups[cell(it.x + it.w / 2, it.y + it.h / 2)].push(it));
+  const empty = groups.map((g, i) => i).filter(i => !groups[i].length && i !== titleCell);
+  const crowded = groups.map((g, i) => i).filter(i => groups[i].length >= 2).sort((a, b) => groups[b].length - groups[a].length);
+  if (!empty.length || !crowded.length) return;
+  const movable = groups[crowded[0]].filter(it => !it.swap && !it.tele);
+  if (!movable.length) return;
+  const it = pick(movable);
+  // prefer empty cells lower down the screen
+  empty.sort((a, b) => Math.floor(b / cols) - Math.floor(a / cols));
+  const target = empty[Math.floor(Math.random() * Math.min(2, empty.length))];
+  const tx = (target % cols + .5) * cw, ty = (Math.floor(target / cols) + .5) * ch;
+  it.tele = true; it.el.style.opacity = 0;
+  setTimeout(() => {
+    it.x = tx - it.w / 2 + (Math.random() - .5) * cw * .3;
+    it.y = ty - it.h / 2 + (Math.random() - .5) * ch * .3;
+    it.ang = Math.random() * Math.PI * 2; it.vx = it.vy = 0;
+    it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
+    it.el.style.opacity = 1;
+    setTimeout(() => { it.tele = false; }, TELE_FADE);
+  }, TELE_FADE);
+}
 function measure() {
   const W = stage.clientWidth, H = stage.clientHeight;
-  const spots = [[.05,.08],[.7,.06],[.04,.6],[.66,.68],[.36,.8]];
+  const spots = [[.06,.08],[.62,.10],[.10,.62],[.60,.66],[.34,.38]];
   items.forEach((it, i) => {
     it.w = it.el.offsetWidth; it.h = it.el.offsetHeight;
     if (!it.placed && W) {
       it.x = spots[i][0] * W; it.y = spots[i][1] * H;
-      const a = Math.random() * Math.PI * 2; it.vx = Math.cos(a) * .35; it.vy = Math.sin(a) * .35;
+      it.ang = Math.random() * Math.PI * 2; it.vx = Math.cos(it.ang) * SPEED; it.vy = Math.sin(it.ang) * SPEED;
       it.placed = true;
     }
   });
 }
-function titleBox() {
-  const s = stage.getBoundingClientRect(), t = title.getBoundingClientRect();
-  return { x: t.left - s.left - 10, y: t.top - s.top - 10, w: t.width + 20, h: t.height + 20 };
-}
-function pushOut(it, r) {
-  const ox = Math.min(it.x + it.w, r.x + r.w) - Math.max(it.x, r.x);
-  const oy = Math.min(it.y + it.h, r.y + r.h) - Math.max(it.y, r.y);
-  if (ox <= 0 || oy <= 0) return;
-  const cx = it.x + it.w / 2 - (r.x + r.w / 2), cy = it.y + it.h / 2 - (r.y + r.h / 2);
-  if (ox < oy) { it.x += cx > 0 ? ox : -ox; it.vx = Math.abs(it.vx) * Math.sign(cx || 1); }
-  else { it.y += cy > 0 ? oy : -oy; it.vy = Math.abs(it.vy) * Math.sign(cy || 1); }
+const easeInOut = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+function startSwap(now) {
+  const free = items.filter(it => !it.swap);
+  if (free.length < 2) return;
+  const a = free.splice(Math.floor(Math.random() * free.length), 1)[0];
+  // prefer a partner that is far away, so the swap actually spreads things out
+  free.sort((p, q) => Math.hypot(q.x - a.x, q.y - a.y) - Math.hypot(p.x - a.x, p.y - a.y));
+  const b = free[Math.floor(Math.random() * Math.min(2, free.length))];
+  a.swap = { fx: a.x, fy: a.y, tx: b.x, ty: b.y, t0: now };
+  b.swap = { fx: b.x, fy: b.y, tx: a.x, ty: a.y, t0: now };
 }
 let paused = false;
 function tick() {
   if (paused) { requestAnimationFrame(tick); return; }
-  const W = stage.clientWidth, H = stage.clientHeight, T = titleBox();
+  const now = performance.now();
+  const W = stage.clientWidth, H = stage.clientHeight;
+  if (!reduce && now >= nextFill) { fillGaps(W, H); nextFill = now + 2500; }
+  if (!reduce && now >= nextSwap) { startSwap(now); nextSwap = now + SWAP_EVERY[0] + Math.random() * (SWAP_EVERY[1] - SWAP_EVERY[0]); }
+
+  // the title stays readable: bubbles may drift across it, but are gently nudged off it so they never park there
+  {
+    const sr = stage.getBoundingClientRect(), tr = title.getBoundingClientRect();
+    const tx = tr.left - sr.left, ty = tr.top - sr.top;
+    items.forEach(it => {
+      if (it.swap || it.tele) return;
+      const ox = Math.min(it.x + it.w, tx + tr.width) - Math.max(it.x, tx);
+      const oy = Math.min(it.y + it.h, ty + tr.height) - Math.max(it.y, ty);
+      if (ox <= 0 || oy <= 0) return;
+      const cx = (it.x + it.w / 2) - (tx + tr.width / 2), cy = (it.y + it.h / 2) - (ty + tr.height / 2);
+      const d = Math.max(1, Math.hypot(cx, cy));
+      it.vx += cx / d * .025; it.vy += cy / d * .025;
+      it.ang = Math.atan2(it.vy, it.vx);
+    });
+  }
+  // gentle spreading: bubbles push each other away a little when close
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    const a = items[i], b = items[j];
+    if (a.swap || b.swap || a.tele || b.tele) continue;
+    const dx = (a.x + a.w / 2) - (b.x + b.w / 2), dy = (a.y + a.h / 2) - (b.y + b.h / 2);
+    const d = Math.max(1, Math.hypot(dx, dy)), reach = (a.w + b.w) / 2 + 60;
+    if (d < reach) { const f = (reach - d) / reach * .03; a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f; }
+  }
+
   items.forEach(it => {
     it.w = it.el.offsetWidth; it.h = it.el.offsetHeight;
-    if (!it.held && !reduce) { it.x += it.vx; it.y += it.vy; }
-    if (it.x < 8) { it.x = 8; it.vx = Math.abs(it.vx); }
-    if (it.y < 8) { it.y = 8; it.vy = Math.abs(it.vy); }
-    if (it.x + it.w > W - 8) { it.x = W - 8 - it.w; it.vx = -Math.abs(it.vx); }
-    if (it.y + it.h > H - 30) { it.y = H - 30 - it.h; it.vy = -Math.abs(it.vy); }
-    pushOut(it, T);
+    if (it.swap) {
+      const k = Math.min(1, (now - it.swap.t0) / SWAP_DUR), e = easeInOut(k);
+      it.x = it.swap.fx + (it.swap.tx - it.swap.fx) * e;
+      it.y = it.swap.fy + (it.swap.ty - it.swap.fy) * e;
+      if (k >= 1) { it.swap = null; it.ang = Math.random() * Math.PI * 2; }
+    } else if (!reduce && !it.tele) {
+      // wander: the heading turns slowly, speed eases back to a calm drift
+      it.ang += (Math.random() - .5) * .06;
+      it.vx += (Math.cos(it.ang) * SPEED - it.vx) * .02;
+      it.vy += (Math.sin(it.ang) * SPEED - it.vy) * .02;
+      it.x += it.vx; it.y += it.vy;
+    }
+    // stay on screen: bounce off the edges and turn back toward the middle
+    const maxX = Math.max(8, W - 8 - it.w), maxY = Math.max(8, H - 30 - it.h);
+    if (it.x < 8) { it.x = 8; it.vx = Math.abs(it.vx); it.ang = Math.atan2(it.vy, it.vx); }
+    if (it.y < 8) { it.y = 8; it.vy = Math.abs(it.vy); it.ang = Math.atan2(it.vy, it.vx); }
+    if (it.x > maxX) { it.x = maxX; it.vx = -Math.abs(it.vx); it.ang = Math.atan2(it.vy, it.vx); }
+    if (it.y > maxY) { it.y = maxY; it.vy = -Math.abs(it.vy); it.ang = Math.atan2(it.vy, it.vx); }
   });
+
+  // bubbles never overlap each other (ones mid-swap glide past freely)
   for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
-    const a = items[i], b = items[j], pad = 14;
+    const a = items[i], b = items[j], pad = 12;
+    if (a.swap || b.swap || a.tele || b.tele) continue;
     const ox = Math.min(a.x + a.w, b.x + b.w) + pad - Math.max(a.x, b.x);
     const oy = Math.min(a.y + a.h, b.y + b.h) + pad - Math.max(a.y, b.y);
     if (ox > 0 && oy > 0) {
       const dx = Math.sign((a.x + a.w/2) - (b.x + b.w/2)) || 1, dy = Math.sign((a.y + a.h/2) - (b.y + b.h/2)) || 1;
-      const fa = b.held ? 1 : a.held ? 0 : .5, fb = 1 - fa;
-      if (ox < oy) { a.x += dx * ox * fa; b.x -= dx * ox * fb; [a.vx, b.vx] = [b.vx, a.vx]; }
-      else { a.y += dy * oy * fa; b.y -= dy * oy * fb; [a.vy, b.vy] = [b.vy, a.vy]; }
+      if (ox < oy) { a.x += dx * ox / 2; b.x -= dx * ox / 2; } else { a.y += dy * oy / 2; b.y -= dy * oy / 2; }
     }
   }
-  items.forEach(it => it.el.style.transform = `translate(${it.x}px, ${it.y}px)`);
+  items.forEach(it => {
+    it.x = Math.min(Math.max(8, it.x), Math.max(8, W - 8 - it.w));   // never pushed off screen
+    it.y = Math.min(Math.max(8, it.y), Math.max(8, H - 30 - it.h));
+    it.el.style.transform = `translate(${it.x}px, ${it.y}px)`;
+  });
   requestAnimationFrame(tick);
 }
 
@@ -736,7 +860,7 @@ const tState = { vi: -1 };
 let current = null, lines = [], tMorph = null;
 
 // break the description into short lines (a few words each), grouped into clusters
-const lineChars = () => lang === "zh" ? (innerWidth <= 640 ? 6 : 10) : (innerWidth <= 640 ? 12 : 18);   // phones: fewer characters per line so the words can be bigger
+const lineChars = () => lang === "zh" ? (innerWidth <= 640 ? 6 : 10) : lang === "ta" ? (innerWidth <= 640 ? 16 : 26) : (innerWidth <= 640 ? 12 : 18);   // phones: fewer characters per line so the words can be bigger
 let builtFor = null;
 function chunkLines(text) {
   const out = []; let cur = "";
@@ -848,7 +972,7 @@ function route() {
   pb.hidden = !b.people;
   if (b.people) document.getElementById("d-people").innerHTML = b.people.map(([h, names]) => `<div><h3>${h}</h3><p>${esc(names)}</p></div>`).join("");
   document.getElementById("d-credits-box").hidden = !b.credits;
-  document.getElementById("d-credits").textContent = ({ en: OTHER_CREDITS, zh: OTHER_CREDITS_ZH, ms: OTHER_CREDITS_MS })[lang];
+  document.getElementById("d-credits").textContent = ({ en: OTHER_CREDITS, zh: OTHER_CREDITS_ZH, ms: OTHER_CREDITS_MS, ta: OTHER_CREDITS_TA })[lang];
   document.getElementById("d-links").innerHTML = linkBars(id);
   detail.hidden = false; detail.scrollTop = 0;
   detail.focus({ preventScroll: true });
@@ -859,13 +983,13 @@ addEventListener("hashchange", route);
 // ---- language switch (globe, bottom-left of the homepage) ----
 const langBtn = document.getElementById("lang-btn");
 function applyLang() {
-  document.documentElement.lang = ({ en: "en", zh: "zh-Hans", ms: "ms" })[lang];
+  document.documentElement.lang = LANG_TAG[lang];
   document.querySelectorAll("[data-i]").forEach(el => { el.textContent = t(el.dataset.i); });
   document.getElementById("lang-label").textContent = t("short");
   langBtn.setAttribute("aria-label", `${t("langAria")}: ${LANG_NAMES[lang]}`);
   document.getElementById("home-fab").setAttribute("aria-label", t("homeAria"));
   document.getElementById("home-btn").setAttribute("aria-label", t("homeAria"));
-  title.setAttribute("aria-label", `${disp(homeTitleText())}. ${t("openAbout")}`);
+  title.setAttribute("aria-label", disp(homeTitleText()));
 }
 function setLang(next) {
   lang = next;
@@ -891,7 +1015,7 @@ function closeLangMenu() { langMenu.hidden = true; langBtn.setAttribute("aria-ex
 function openLangMenu() {
   const others = LANG_ORDER.filter(l => l !== lang);
   langMenu.innerHTML = others.map(l =>
-    `<button class="lang-opt" type="button" data-lang="${l}" lang="${({ en: "en", zh: "zh-Hans", ms: "ms" })[l]}">${LANG_NAMES[l]}${tailSVG}</button>`).join("");
+    `<button class="lang-opt" type="button" data-lang="${l}" lang="${LANG_TAG[l]}">${LANG_NAMES[l]}${tailSVG}</button>`).join("");
   langMenu.hidden = false; langBtn.setAttribute("aria-expanded", "true");
   langMenu.querySelector(".lang-opt").focus({ preventScroll: true });
 }
