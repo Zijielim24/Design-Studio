@@ -17,15 +17,16 @@
   --f-ui: "Patrick Hand", "ZCOOL KuaiLe", "Arima", "Comic Sans MS", cursive;
   color-scheme: light;
 }
-html, body { height: 100%; }
+html, body { min-height: 100%; }
+html { height: 100%; }
 body {
   background: var(--paper); color: var(--ink);
-  font-family: var(--f-ui); overflow: hidden;
+  font-family: var(--f-ui); overflow-x: hidden; overflow-y: auto;   /* the homepage scrolls when a language needs more room */
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   box-sizing: border-box;
 }
-.page { position: relative; height: 100%; display: flex; flex-direction: column; }
+.page { position: relative; min-height: 100%; display: flex; flex-direction: column; }
 
 header {
   display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;
@@ -40,7 +41,12 @@ header .side.right { text-align: right; }
 .why .goal-label { margin: 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .why .goal { margin: 0; max-width: 40ch; font-size: clamp(19px, 1.7vw, 24px); line-height: 1.4; color: var(--ink); text-wrap: balance; }
 
-.stage { position: relative; flex: 1; min-height: 0; }
+.stage { position: relative; flex: 1 0 auto; min-height: max(480px, 62vh); }   /* bubbles always get room; extra text pushes the page longer instead */
+/* languages with longer words get a taller homepage, so bubbles and title have room (you scroll a little) */
+:root[lang="ta"] .stage { min-height: max(760px, 100vh); }
+:root[lang="ms"] .stage { min-height: max(600px, 78vh); }
+:root[lang="ta"] .why { padding-top: 24px; gap: 10px; }
+:root[lang="ta"] .why .goal { line-height: 1.6; }
 
 .br { position: absolute; width: 34px; height: 34px; border: 0 solid var(--ink); filter: url(#wobble); pointer-events: none; }
 .br.tl { top: 8px; left: 4px; border-top-width: 3px; border-left-width: 3px; }
@@ -194,7 +200,8 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 /* language switch: hand-drawn globe, bottom-left inside the corner bracket */
 .lang-btn {
   /* bottom-left corner of the screen, beside the "why this website" text, clear of the bubbles */
-  position: absolute; left: 0; bottom: max(8px, env(safe-area-inset-bottom, 0px)); z-index: 6;
+  /* pinned to the bottom-left of the screen, floating above everything on the homepage, even while scrolling */
+  position: fixed; left: max(14px, calc(env(safe-area-inset-left, 0px) + 10px)); bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 8px)); z-index: 15;
   display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; border: 0; background: none;
   color: var(--ink); cursor: pointer; font-family: var(--f-ui); font-size: 13px;
   -webkit-tap-highlight-color: transparent;
@@ -209,7 +216,7 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 .lang-btn:focus-visible .globe { box-shadow: 0 0 0 2px var(--blue); }
 
 /* language picker: two speech bubbles that pop up above the globe */
-.lang-menu { position: absolute; left: 0; bottom: calc(100% + 14px); z-index: 7; display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
+.lang-menu { position: fixed; left: max(14px, calc(env(safe-area-inset-left, 0px) + 10px)); bottom: max(86px, calc(env(safe-area-inset-bottom, 0px) + 82px)); z-index: 16; display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
 .lang-opt {
   position: relative; padding: 10px 20px 12px; border: 0; background: none; cursor: pointer;
   font-family: var(--f-hand); font-weight: 700; font-size: 24px; line-height: 1.1; color: var(--ink);
