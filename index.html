@@ -36,7 +36,7 @@ header .side a:hover, header .side a:focus-visible { color: var(--blue); outline
 header .side span { color: var(--muted); display: block; }
 header .side.right { text-align: right; }
 /* "Why this website" now sits at the bottom of the homepage */
-.why { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; padding-block: 2px max(8px, env(safe-area-inset-bottom, 0px)); }
+.why { position: relative; z-index: 7; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; min-width: 0; padding-block: 2px max(8px, env(safe-area-inset-bottom, 0px)); padding-inline: 58px; }
 .why .goal-label { margin: 0; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .why .goal { margin: 0; max-width: 40ch; font-size: clamp(19px, 1.7vw, 24px); line-height: 1.4; color: var(--ink); text-wrap: balance; }
 
@@ -193,9 +193,10 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 
 /* language switch: hand-drawn globe, bottom-left inside the corner bracket */
 .lang-btn {
-  position: absolute; left: 18px; bottom: 26px; z-index: 6;
-  display: flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none;
-  color: var(--ink); cursor: pointer; font-family: var(--f-ui); font-size: 16px;
+  /* bottom-left corner of the screen, beside the "why this website" text, clear of the bubbles */
+  position: absolute; left: 0; bottom: max(8px, env(safe-area-inset-bottom, 0px)); z-index: 6;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; border: 0; background: none;
+  color: var(--ink); cursor: pointer; font-family: var(--f-ui); font-size: 13px;
   -webkit-tap-highlight-color: transparent;
 }
 .lang-btn .globe {
@@ -208,7 +209,7 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 .lang-btn:focus-visible .globe { box-shadow: 0 0 0 2px var(--blue); }
 
 /* language picker: two speech bubbles that pop up above the globe */
-.lang-menu { position: absolute; left: 14px; bottom: 92px; z-index: 7; display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
+.lang-menu { position: absolute; left: 0; bottom: calc(100% + 14px); z-index: 7; display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
 .lang-opt {
   position: relative; padding: 10px 20px 12px; border: 0; background: none; cursor: pointer;
   font-family: var(--f-hand); font-weight: 700; font-size: 24px; line-height: 1.1; color: var(--ink);
@@ -244,7 +245,7 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
 
 @media (max-width: 640px) {
   header { grid-template-columns: 1fr 1fr; font-size: 13px; }
-  .why .goal { font-size: 19px; max-width: 30ch; }
+  .why .goal { font-size: 18px; max-width: 26ch; }
   .bubble { font-size: 18px; max-width: 150px; padding: 9px 12px 11px; }
   .bubble.doc { max-width: 130px; }
   .box { padding: 18px 18px 20px; }
@@ -286,6 +287,11 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
     <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br brr"></i>
     <h1 id="title" aria-label="Inclusive Carriage"></h1>
     <p class="hint" id="hint" data-i="hint">Tap a bubble to open</p>
+  </main>
+
+  <footer class="why">
+    <p class="goal-label" data-i="goalLabel">Why this website</p>
+    <p class="goal" data-i="goal">MRT carriages co-designed with disability advocates. Watch the words shift to feel how reading can be with dyslexia.</p>
     <button class="lang-btn" id="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu">
       <span class="globe" aria-hidden="true">
         <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -297,11 +303,6 @@ h1 .g.drop { transform: translateY(.12em) rotate(-8deg); }
       <span id="lang-label">EN</span>
     </button>
     <div class="lang-menu" id="lang-menu" hidden></div>
-  </main>
-
-  <footer class="why">
-    <p class="goal-label" data-i="goalLabel">Why this website</p>
-    <p class="goal" data-i="goal">MRT carriages co-designed with disability advocates. Watch the words shift to feel how reading can be with dyslexia.</p>
   </footer>
 </div>
 
